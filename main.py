@@ -71,39 +71,35 @@ def generate_advanced_lesson(theme):
     prompt = f"""
 Topic: {theme}
 
-Write like a hedge fund manager evaluating real-world capital allocation.
+Write like a capital allocator evaluating equity compounding potential.
 
-Do NOT use symbolic equations.
-Do NOT write textbook finance formulas.
-Do NOT invent math notation.
+Avoid descriptive industry commentary.
+Focus on equity return mechanics.
 
-Focus on concrete economic realities:
+Force yourself to analyze:
 
-- What are the major fixed capital requirements?
-- What utilization level changes profitability?
-- What pricing pressure risk exists?
-- What supply-demand imbalance currently exists?
-- Where is capital overbuilding capacity?
-- Where does incremental capital earn above cost?
-- Where could ROCE inflect materially?
-- What specific industry thresholds change equity outcomes?
+- How capital (float or fixed assets) generates incremental return
+- What combined ratio / pricing threshold changes ROE structurally
+- What capital impairment triggers a hard pricing cycle
+- How book value compounds over 5–10 years
+- Where downside is protected (balance sheet logic)
+- Where capital exits could create pricing power
+- What shifts could expand valuation multiples
 
 Structure strictly:
 
 Title:
 
-1. Industry Capital Intensity & Fixed Cost Structure
-2. Where Economic Returns Are Actually Earned
-3. Current Capital Cycle Stage (evidence-based reasoning)
-4. Operating Leverage Thresholds That Matter
-5. ROCE / Free Cash Flow Inflection Logic
-6. How Overcapacity or Capital Flood Destroys Returns
-7. Conditions Required for 5–10x Equity Compounding
-8. Early Signals That Capital Is Being Misallocated
+1. Capital Base & Return Engine (how equity actually compounds)
+2. Pricing Power Threshold That Changes ROE
+3. Soft vs Hard Market Cycle Transition Logic
+4. Book Value Compounding Pathway
+5. Where Equity IRR Inflects
+6. How Capital Flood Creates Long Downcycles
+7. Convexity Setup: Why 5–10x Is Possible (or Not)
+8. Leading Indicators of Cycle Turn
 
-Be concrete.
-Use industry-specific economics.
-Think in real business terms, not formulas.
+Be specific. Think in terms of equity IRR, not industry growth.
 """
 
     response = client.chat.completions.create(
