@@ -3,22 +3,39 @@ import pandas as pd
 def normalize(series):
     return (series - series.min()) / (series.max() - series.min() + 1e-9)
 
-def rank_stocks(df):
-    df["NormSales"] = normalize(df["SalesGrowth"])
-    df["NormROCE"] = normalize(df["ROCE"])
+def select_structured(df):
 
-    df["Score"] = 0.6 * df["NormSales"] + 0.4 * df["NormROCE"]
+    selected = []
 
-    priority = {"Moonshot": 1, "Acceleration": 2, "Growth": 3}
-    df["Priority"] = df["Bucket"].map(priority)
+    # CATEGORY 1: Top 3 Sales Growth
+    top_sales = df.sort_values("SalesGrowth", ascending=False).head(3)
+    selected.append(top_sales)
 
-    df = df.sort_values(by=["Priority", "Score"], ascending=[True, False])
-    df = df.drop_duplicates(subset="Name", keep="first")
+    # CATEGORY 2: Top 3 ROCE (not already selected)
+    remaining = df[~df["Name"].isin(pd.concat(selected)["Name"])]
+    top_roce = remaining.sort_values("ROCE", ascending=False).head(3)
+    selected.append(top_roce)
 
-    top_growth = df[df["Bucket"] == "Growth"].head(5)
-    top_acc = df[df["Bucket"] == "Acceleration"].head(5)
-    top_moon = df[df["Bucket"] == "Moonshot"].head(5)
+    # CATEGORY 3: Top 3 Profit Growth
+    remaining = df[~df["Name"].isin(pd.concat(selected)["Name"])]
+    top_profit = remaining.sort_values("ProfitGrowth", ascending=False).head(3)
+    selected.append(top_profit)
 
-    final_df = pd.concat([top_growth, top_acc, top_moon])
+    # CATEGORY 4: Smallest market cap in top quartile growth
+    remaining = df[~df["Name"].isin(pd.concat(selected)["Name"])]
+    quartile = remaining["SalesGrowth"].quantile(0.75)
+    high_growth = remaining[remaining["SalesGrowth"] >= quartile]
+    small_caps = high_growth.sort_values("MarketCap").head(2)
+    selected.append(small_caps)
 
+    # CATEGORY 5: ROCE 12–18 & Sales > 40
+    remaining = df[~df["Name"].isin(pd.concat(selected)["Name"])]
+    early_stage = remaining[
+        (remaining["ROCE"] >= 12) &
+        (remaining["ROCE"] <= 18) &
+        (remaining["SalesGrowth"] > 40)
+    ].head(2)
+    selected.append(early_stage)
+
+    final_df = pd.concat(selected).drop_duplicates("Name")
     return final_df
