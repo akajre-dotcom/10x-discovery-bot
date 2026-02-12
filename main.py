@@ -13,21 +13,34 @@ RSS_FEEDS = [
     "https://www.livemint.com/rss/markets"
 ]
 
-TOPIC_MEMORY_FILE = "last_topics.txt"
+MEMORY_FILE = "topic_memory.txt"
+
+DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"]
 
 
 def get_market_headlines():
     headlines = []
-
     for url in RSS_FEEDS:
         feed = feedparser.parse(url)
         for entry in feed.entries[:5]:
             headlines.append(entry.title)
-
     return headlines
 
 
-def pick_structural_theme(headlines):
+def read_memory():
+    try:
+        with open(MEMORY_FILE, "r") as f:
+            return f.read().splitlines()
+    except:
+        return []
+
+
+def write_memory(theme):
+    with open(MEMORY_FILE, "a") as f:
+        f.write(theme + "\n")
+
+
+def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
     prompt = f"""
@@ -36,7 +49,8 @@ def pick_structural_theme(headlines):
     {sampled}
 
     Identify ONE structural investing theme (not short-term news).
-    Example: Capital cycle in defence, Renewable supply chain, EV battery economics, etc.
+    Avoid these recently covered themes:
+    {memory[-10:]}
 
     Return only the theme title.
     """
@@ -49,12 +63,13 @@ def pick_structural_theme(headlines):
     return response.choices[0].message.content.strip()
 
 
-def generate_deep_learning(theme):
+def generate_daily_lesson(theme, difficulty):
 
     prompt = f"""
     Topic: {theme}
+    Difficulty Level: {difficulty}
 
-    Generate a deep structural investing lesson.
+    Generate a structural investing lesson.
 
     Structure strictly:
 
@@ -67,8 +82,37 @@ def generate_deep_learning(theme):
     6. Investor Edge
     7. Mental Model Summary
 
-    Keep concise but deep.
-    Avoid repetition of generic advice.
+    Depth should match difficulty level.
+    Keep concise but insightful.
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_weekly_thesis():
+
+    prompt = """
+    Generate a deep institutional-grade structural sector thesis for India.
+
+    Structure strictly:
+
+    Title:
+    1. Why Now
+    2. Demand Drivers
+    3. Policy Impact
+    4. Capital Cycle Stage
+    5. Margin Drivers
+    6. Competitive Landscape
+    7. Where Value May Accrue
+    8. What Would Break the Thesis
+    9. Monitoring Checklist
+
+    Provide advanced level depth.
     """
 
     response = client.chat.completions.create(
@@ -81,14 +125,29 @@ def generate_deep_learning(theme):
 
 def main():
 
+    today = datetime.today()
+    weekday = today.weekday()
+
+    if weekday == 6:  # Sunday
+        content = generate_weekly_thesis()
+        subject = "100X Weekly — Institutional Sector Thesis"
+        send_email(content, subject)
+        return
+
     headlines = get_market_headlines()
-    theme = pick_structural_theme(headlines)
+    memory = read_memory()
 
-    content = generate_deep_learning(theme)
+    theme = pick_theme(headlines, memory)
 
-    subject = f"100X Daily — {theme}"
+    difficulty = DIFFICULTY_LEVELS[weekday % 3]
 
-    send_email(content, subject)
+    lesson = generate_daily_lesson(theme, difficulty)
+
+    write_memory(theme)
+
+    subject = f"100X Daily ({difficulty}) — {theme}"
+
+    send_email(lesson, subject)
 
 
 if __name__ == "__main__":
