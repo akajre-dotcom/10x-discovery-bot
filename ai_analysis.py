@@ -6,11 +6,12 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def generate_tag(stock):
 
     prompt = f"""
-    Classify this stock based on data:
+    Classify this stock based on financial metrics.
 
+    Data:
     {stock}
 
-    Output only in this format:
+    Output ONLY in this exact format:
 
     Profile: (Structural / Acceleration / Early Stage / Cyclical)
     Asymmetry: (Low / Medium / High)
