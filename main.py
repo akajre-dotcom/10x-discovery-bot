@@ -49,8 +49,8 @@ Based on these Indian market headlines:
 Identify ONE specific structural industry or capital cycle theme.
 
 Rules:
-- Must be tied to a specific sector (examples: Solar manufacturing, Defence exports, EV battery supply chain, Railway capex, Specialty chemicals, SaaS exports, Capital goods cycle).
-- Avoid generic themes like "market volatility", "uncertainty", "global economy".
+- Must be a specific sector (e.g., Solar manufacturing, Defence exports, EV battery supply chain, Railway capex, Specialty chemicals, SaaS exports).
+- Avoid generic themes like "market volatility" or "global uncertainty".
 - Must involve capital allocation, supply-demand imbalance, or structural transformation.
 - Avoid repeating recently covered themes:
 {memory[-20:]}
@@ -68,7 +68,7 @@ Return ONLY the theme title.
 
 def generate_advanced_lesson(theme):
 
-prompt = f"""
+    prompt = f"""
 Topic: {theme}
 
 Write like a portfolio manager thinking in capital allocation math.
@@ -79,7 +79,7 @@ No generic explanation.
 
 Think in equations and capital flows.
 
-Force yourself to answer:
+Answer through reasoning:
 
 - Where does free cash flow inflect?
 - What operating margin threshold changes equity returns?
@@ -103,7 +103,6 @@ Title:
 Be precise. Analytical. Think like allocator, not operator.
 """
 
-
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}]
@@ -111,26 +110,26 @@ Be precise. Analytical. Think like allocator, not operator.
 
     return response.choices[0].message.content
 
-def generate_weekly_thesis():
-    prompt = """
-Generate a deep institutional sector thesis for India.
 
-Write like a portfolio manager memo.
+def generate_weekly_thesis():
+
+    prompt = """
+Generate an institutional-grade sector thesis for India.
 
 Structure:
 
 Title:
 
-1. Why Now (capital flow + policy + demand)
-2. Demand Drivers
+1. Why Capital Is Moving Here
+2. Supply-Demand Imbalance
 3. Capital Cycle Stage
-4. Competitive Structure
-5. Margin Outlook & ROCE Trajectory
-6. Risk of Capital Flood
-7. What Would Break the Thesis
-8. Monitoring Framework
+4. ROCE Trajectory Logic
+5. Margin Expansion / Compression Risk
+6. Capital Flood Risk
+7. Monitoring Variables
+8. What Would Break the Thesis
 
-Analytical. Not generic.
+Dense. Analytical. No generic macro commentary.
 """
 
     response = client.chat.completions.create(
@@ -142,17 +141,20 @@ Analytical. Not generic.
 
 
 def generate_monthly_regime():
+
     prompt = """
 Generate a Capital Market Regime Review for India.
 
-Include:
-- Liquidity conditions
+Focus on:
+
+- Liquidity cycle
 - Risk appetite shift
 - Sector capital rotation
-- Valuation expansion/compression
-- Early signals of capital migration
+- Valuation compression vs expansion
+- Where capital is withdrawing
+- Where capital is concentrating
 
-Write like institutional strategy note.
+Write like institutional strategy memo.
 """
 
     response = client.chat.completions.create(
@@ -164,16 +166,17 @@ Write like institutional strategy note.
 
 
 def generate_sector_heatmap():
+
     prompt = """
 Generate a Quarterly Indian Sector Heatmap.
 
 For each major sector:
 - Capital Cycle Stage (Early/Mid/Late)
-- Margin Trend (Expanding/Flat/Contracting)
-- ROCE Direction
+- Margin Direction
+- ROCE Trend
 - Capital Inflow Risk
 - Asymmetry Potential (Low/Medium/High)
-- 2-line reasoning
+- Brief reasoning
 
 Concise but analytical.
 """
@@ -187,19 +190,20 @@ Concise but analytical.
 
 
 def generate_case_study():
+
     prompt = """
-Provide a deep historical 100x stock case study (India or Global).
+Provide a deep historical 100x stock case study.
 
 Structure:
 
 Title:
 
-1. Starting Industry Structure
+1. Initial Industry Structure
 2. Structural Tailwind
 3. Capital Allocation Decisions
 4. ROCE Inflection
 5. Margin Expansion Phase
-6. Periods of Severe Drawdown
+6. Severe Drawdown Periods
 7. Why Most Investors Missed It
 8. Lessons for Identifying Future 100x
 
@@ -215,16 +219,18 @@ Analytical. No storytelling fluff.
 
 
 def generate_position_sizing():
+
     prompt = """
-Generate an advanced institutional note on Position Sizing.
+Generate an institutional note on Position Sizing.
 
 Include:
-- Kelly intuition (not formula heavy)
+
 - Risk of ruin
-- Concentration vs diversification
+- Concentration vs diversification math
+- Asymmetric payoff sizing
 - Volatility tolerance vs conviction
-- How professionals size asymmetric bets
-- Behavioral failure patterns
+- Capital preservation logic
+- Behavioral traps in sizing
 
 Analytical. Practical. No generic advice.
 """
@@ -244,7 +250,7 @@ def main():
     day = today.day
     month = today.month
 
-    # Quarterly Sector Heatmap
+    # Quarterly Heatmap
     if day == 1 and month in [1, 4, 7, 10]:
         content = generate_sector_heatmap()
         subject = "100X Quarterly — Sector Heatmap"
@@ -258,7 +264,7 @@ def main():
         send_email(content, subject)
         return
 
-    # Sunday Weekly Thesis
+    # Sunday Thesis
     if weekday == 6:
         content = generate_weekly_thesis()
         subject = "100X Weekly — Institutional Sector Thesis"
@@ -272,7 +278,7 @@ def main():
         send_email(content, subject)
         return
 
-    # Mid-quarter Case Study
+    # Quarterly Case Study (15th of quarter months)
     if day == 15 and month in [1, 4, 7, 10]:
         content = generate_case_study()
         subject = "100X Case Study — Historical 100x Dissection"
