@@ -42,16 +42,21 @@ def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
     prompt = f"""
-    Based on these Indian market headlines:
+Based on these Indian market headlines:
 
-    {sampled}
+{sampled}
 
-    Identify ONE structural capital cycle or transformation theme.
-    Avoid repeating recently covered themes:
-    {memory[-20:]}
+Identify ONE specific structural industry or capital cycle theme.
 
-    Return only the theme title.
-    """
+Rules:
+- Must be tied to a specific sector (examples: Solar manufacturing, Defence exports, EV battery supply chain, Railway capex, Specialty chemicals, SaaS exports, Capital goods cycle).
+- Avoid generic themes like "market volatility", "uncertainty", "global economy".
+- Must involve capital allocation, supply-demand imbalance, or structural transformation.
+- Avoid repeating recently covered themes:
+{memory[-20:]}
+
+Return ONLY the theme title.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -62,23 +67,41 @@ def pick_theme(headlines, memory):
 
 
 def generate_advanced_lesson(theme):
+
     prompt = f"""
-    Topic: {theme}
+Topic: {theme}
 
-    Generate an ADVANCED institutional-grade structural investing note.
+Write like a hedge fund portfolio manager training a serious analyst.
 
-    Structure:
+Do NOT write generic macro commentary.
+Do NOT give textbook definitions.
+Be analytical and capital-cycle focused.
 
-    1. Structural Context
-    2. Industry Value Chain
-    3. Unit Economics & Operating Leverage
-    4. Capital Cycle Positioning
-    5. Competitive Advantage Formation
-    6. Margin Drivers
-    7. Failure & Regime Shift Scenarios
-    8. Investor Edge Framework
-    9. Conditions for 5–10x Outcome
-    """
+Focus strictly on:
+- Real unit economics
+- Capital intensity
+- Supply-demand imbalance
+- Competitive structure
+- ROCE expansion pathway
+- Operating leverage inflection
+- Where capital destruction risk hides
+
+Structure strictly:
+
+Title:
+
+1. Structural Context (why this industry now)
+2. Value Chain Economics (who captures value)
+3. Unit Economics Deep Dive (margin math & cost drivers)
+4. Capital Cycle Position (early/mid/late with reasoning)
+5. Competitive Advantage Formation
+6. ROCE Expansion Pathway
+7. What Destroys Returns Here
+8. Conditions Required for 5–10x Outcome
+
+Dense. Analytical. Institutional tone.
+No motivational language.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -90,19 +113,25 @@ def generate_advanced_lesson(theme):
 
 def generate_weekly_thesis():
     prompt = """
-    Generate a deep institutional sector thesis for India.
+Generate a deep institutional sector thesis for India.
 
-    Structure:
+Write like a portfolio manager memo.
 
-    1. Why Now
-    2. Demand Drivers
-    3. Policy Impact
-    4. Capital Cycle Stage
-    5. Competitive Structure
-    6. Margin Outlook
-    7. Risks
-    8. Monitoring Checklist
-    """
+Structure:
+
+Title:
+
+1. Why Now (capital flow + policy + demand)
+2. Demand Drivers
+3. Capital Cycle Stage
+4. Competitive Structure
+5. Margin Outlook & ROCE Trajectory
+6. Risk of Capital Flood
+7. What Would Break the Thesis
+8. Monitoring Framework
+
+Analytical. Not generic.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -114,15 +143,17 @@ def generate_weekly_thesis():
 
 def generate_monthly_regime():
     prompt = """
-    Generate a Capital Market Regime Review for India.
+Generate a Capital Market Regime Review for India.
 
-    Include:
-    - Liquidity Conditions
-    - Sector Rotation
-    - Risk Appetite
-    - Valuation Compression/Expansion
-    - Early Signals of Capital Shift
-    """
+Include:
+- Liquidity conditions
+- Risk appetite shift
+- Sector capital rotation
+- Valuation expansion/compression
+- Early signals of capital migration
+
+Write like institutional strategy note.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -134,15 +165,18 @@ def generate_monthly_regime():
 
 def generate_sector_heatmap():
     prompt = """
-    Generate a Quarterly Sector Heatmap for Indian equities.
+Generate a Quarterly Indian Sector Heatmap.
 
-    For each major sector:
-    - Capital Cycle Stage (Early/Mid/Late)
-    - Margin Trend (Expanding/Flat/Contracting)
-    - Risk Level (Low/Moderate/High)
-    - Asymmetry Potential (Low/Medium/High)
-    - Brief 2-line explanation
-    """
+For each major sector:
+- Capital Cycle Stage (Early/Mid/Late)
+- Margin Trend (Expanding/Flat/Contracting)
+- ROCE Direction
+- Capital Inflow Risk
+- Asymmetry Potential (Low/Medium/High)
+- 2-line reasoning
+
+Concise but analytical.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -154,17 +188,23 @@ def generate_sector_heatmap():
 
 def generate_case_study():
     prompt = """
-    Provide a deep historical 100x case study (Indian or Global).
+Provide a deep historical 100x stock case study (India or Global).
 
-    Structure:
-    - Company Background
-    - Structural Tailwind
-    - Capital Allocation Decisions
-    - Inflection Point
-    - Margin Expansion Path
-    - Key Risk Periods
-    - Lessons for Identifying Future 100x
-    """
+Structure:
+
+Title:
+
+1. Starting Industry Structure
+2. Structural Tailwind
+3. Capital Allocation Decisions
+4. ROCE Inflection
+5. Margin Expansion Phase
+6. Periods of Severe Drawdown
+7. Why Most Investors Missed It
+8. Lessons for Identifying Future 100x
+
+Analytical. No storytelling fluff.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -176,15 +216,18 @@ def generate_case_study():
 
 def generate_position_sizing():
     prompt = """
-    Generate an advanced lesson on Position Sizing Psychology.
+Generate an advanced institutional note on Position Sizing.
 
-    Include:
-    - Kelly Criterion intuition
-    - Asymmetry vs conviction
-    - Risk of ruin
-    - Concentration vs diversification
-    - Handling volatility without overreaction
-    """
+Include:
+- Kelly intuition (not formula heavy)
+- Risk of ruin
+- Concentration vs diversification
+- Volatility tolerance vs conviction
+- How professionals size asymmetric bets
+- Behavioral failure patterns
+
+Analytical. Practical. No generic advice.
+"""
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -201,14 +244,14 @@ def main():
     day = today.day
     month = today.month
 
-    # Quarterly Sector Heatmap (Jan/Apr/Jul/Oct on 1st)
+    # Quarterly Sector Heatmap
     if day == 1 and month in [1, 4, 7, 10]:
         content = generate_sector_heatmap()
         subject = "100X Quarterly — Sector Heatmap"
         send_email(content, subject)
         return
 
-    # Monthly Capital Regime
+    # Monthly Regime Review
     if day == 1:
         content = generate_monthly_regime()
         subject = "100X Monthly — Capital Regime Review"
@@ -225,11 +268,11 @@ def main():
     # Friday Position Sizing
     if weekday == 4:
         content = generate_position_sizing()
-        subject = "100X — Position Sizing & Psychology"
+        subject = "100X — Position Sizing & Capital Allocation"
         send_email(content, subject)
         return
 
-    # Mid-quarter Case Study (15th of quarter months)
+    # Mid-quarter Case Study
     if day == 15 and month in [1, 4, 7, 10]:
         content = generate_case_study()
         subject = "100X Case Study — Historical 100x Dissection"
