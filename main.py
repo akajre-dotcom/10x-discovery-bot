@@ -15,8 +15,6 @@ RSS_FEEDS = [
 
 MEMORY_FILE = "topic_memory.txt"
 
-DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"]
-
 
 def get_market_headlines():
     headlines = []
@@ -44,13 +42,13 @@ def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
     prompt = f"""
-    Based on these current market headlines:
+    Based on these current Indian market headlines:
 
     {sampled}
 
-    Identify ONE structural investing theme (not short-term news).
-    Avoid these recently covered themes:
-    {memory[-10:]}
+    Identify ONE structural capital cycle or industry transformation theme.
+    Avoid repeating recently covered themes:
+    {memory[-15:]}
 
     Return only the theme title.
     """
@@ -63,56 +61,31 @@ def pick_theme(headlines, memory):
     return response.choices[0].message.content.strip()
 
 
-def generate_daily_lesson(theme, difficulty):
+def generate_advanced_lesson(theme):
 
     prompt = f"""
     Topic: {theme}
-    Difficulty Level: {difficulty}
 
-    Generate a structural investing lesson.
+    You are training a professional long-term capital allocator.
 
-    Structure strictly:
-
-    Title:
-    1. First Principle
-    2. Industry Mechanics
-    3. Capital Intensity & Unit Economics
-    4. Where Moat Forms
-    5. Failure Mode
-    6. Investor Edge
-    7. Mental Model Summary
-
-    Depth should match difficulty level.
-    Keep concise but insightful.
-    """
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
-
-
-def generate_weekly_thesis():
-
-    prompt = """
-    Generate a deep institutional-grade structural sector thesis for India.
+    Generate an ADVANCED institutional-grade structural investing note.
 
     Structure strictly:
 
     Title:
-    1. Why Now
-    2. Demand Drivers
-    3. Policy Impact
-    4. Capital Cycle Stage
-    5. Margin Drivers
-    6. Competitive Landscape
-    7. Where Value May Accrue
-    8. What Would Break the Thesis
-    9. Monitoring Checklist
 
-    Provide advanced level depth.
+    1. Structural Context (macro + capital flow positioning)
+    2. Industry Value Chain Breakdown
+    3. Unit Economics & Operating Leverage
+    4. Capital Cycle Positioning (early/mid/late)
+    5. Competitive Advantage Formation
+    6. Margin Expansion / Compression Drivers
+    7. Failure & Regime Shift Scenarios
+    8. Investor Edge Framework (what differentiates alpha here)
+    9. What Must Be True For 5–10x Outcome
+
+    Keep dense, analytical, non-generic.
+    Avoid motivational language.
     """
 
     response = client.chat.completions.create(
@@ -125,27 +98,15 @@ def generate_weekly_thesis():
 
 def main():
 
-    today = datetime.today()
-    weekday = today.weekday()
-
-    if weekday == 6:  # Sunday
-        content = generate_weekly_thesis()
-        subject = "100X Weekly — Institutional Sector Thesis"
-        send_email(content, subject)
-        return
-
     headlines = get_market_headlines()
     memory = read_memory()
 
     theme = pick_theme(headlines, memory)
-
-    difficulty = DIFFICULTY_LEVELS[weekday % 3]
-
-    lesson = generate_daily_lesson(theme, difficulty)
+    lesson = generate_advanced_lesson(theme)
 
     write_memory(theme)
 
-    subject = f"100X Daily ({difficulty}) — {theme}"
+    subject = f"100X Advanced — {theme}"
 
     send_email(lesson, subject)
 
