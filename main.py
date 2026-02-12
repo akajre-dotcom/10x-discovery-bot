@@ -1,22 +1,30 @@
 from scraper import get_all_data
-from ranking import rank_stocks
-from ai_analysis import generate_thesis
+from ranking import select_structured
+from ai_analysis import generate_tag
 from emailer import send_email
 
 data = get_all_data()
-top_stocks = rank_stocks(data)
 
-report = "WEEKLY STOCK DISCOVERY REPORT\n\n"
+# Ensure numeric
+data["MarketCap"] = data.get("MarketCap", 0)
 
-for _, row in top_stocks.iterrows():
-    report += f"\nBucket: {row['Bucket']}\n"
-    report += f"Stock: {row['Name']}\n"
-    report += f"Sales Growth: {row['SalesGrowth']}%\n"
-    report += f"ROCE: {row['ROCE']}%\n"
-    report += f"Score: {round(row['Score'],2)}\n"
+selected = select_structured(data)
 
-    thesis = generate_thesis(row.to_dict())
-    report += thesis
-    report += "\n-----------------------------\n"
+report = "WEEKLY OPPORTUNITY DASHBOARD\n\n"
+
+report += f"Scanned: {len(data)} | Selected: {len(selected)}\n\n"
+
+report += "Stock | Sales% | Profit% | ROCE% | Tag\n"
+report += "-"*60 + "\n"
+
+for _, row in selected.iterrows():
+
+    tag = generate_tag(row.to_dict())
+
+    report += f"{row['Name']} | "
+    report += f"{row['SalesGrowth']} | "
+    report += f"{row['ProfitGrowth']} | "
+    report += f"{row['ROCE']} | "
+    report += f"{tag}\n"
 
 send_email(report)
