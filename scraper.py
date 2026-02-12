@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-URL = "PASTE_YOUR_SCREENER_URL"
+URL = "https://www.screener.in/screens/3490682/100x/"
 
 def get_screen_data():
     headers = {"User-Agent": "Mozilla/5.0"}
