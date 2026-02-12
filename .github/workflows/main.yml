@@ -2,8 +2,9 @@ name: 100X Learning Bot
 
 on:
   schedule:
-    - cron: '0 3 * * *'   # Runs daily at 03:00 UTC
+    - cron: '30 2 * * *'   # 8:00 AM IST
   workflow_dispatch:
+
 
 jobs:
   run-bot:
