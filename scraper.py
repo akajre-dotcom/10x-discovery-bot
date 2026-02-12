@@ -8,6 +8,18 @@ SCREENS = {
     "Moonshot": "https://www.screener.in/screens/3490945/moonshots-1015-allocation/"
 }
 
+def extract_number(value):
+    try:
+        return float(
+            value.replace('%','')
+                 .replace(',','')
+                 .replace('Cr.','')
+                 .strip()
+        )
+    except:
+        return 0.0
+
+
 def fetch_screen(screen_name, base_url):
     all_data = []
     page = 1
@@ -26,33 +38,30 @@ def fetch_screen(screen_name, base_url):
         if table is None:
             break
 
-        rows = table.find_all("tr")[1:]
+        headers_row = [th.text.strip() for th in table.find("thead").find_all("th")]
+        rows = table.find("tbody").find_all("tr")
+
         if not rows:
             break
 
         for row in rows:
             cols = [col.text.strip() for col in row.find_all("td")]
-            if len(cols) > 5:
-                all_data.append({
-                    "Name": cols[0],
-                    "MarketCap": extract_number(cols[1]),
-                    "SalesGrowth": extract_number(cols[2]),
-                    "ProfitGrowth": extract_number(cols[3]),
-                    "ROCE": extract_number(cols[4]),
-                    "Bucket": screen_name
-                })
+            row_dict = dict(zip(headers_row, cols))
 
+            all_data.append({
+                "Name": row_dict.get("Name", ""),
+                "MarketCap": extract_number(row_dict.get("Mar Cap Rs.Cr.", "0")),
+                "SalesGrowth": extract_number(row_dict.get("Sales growth %", "0")),
+                "ProfitGrowth": extract_number(row_dict.get("Profit growth %", "0")),
+                "ROCE": extract_number(row_dict.get("ROCE %", "0")),
+                "Debt": extract_number(row_dict.get("Debt / Eq", "0")),
+                "OneYearReturn": extract_number(row_dict.get("1Yr return %", "0")),
+                "Bucket": screen_name
+            })
 
         page += 1
 
     return pd.DataFrame(all_data)
-
-
-def extract_number(value):
-    try:
-        return float(value.replace('%','').replace(',',''))
-    except:
-        return 0
 
 
 def get_all_data():
@@ -62,4 +71,6 @@ def get_all_data():
         dfs.append(df)
 
     combined = pd.concat(dfs, ignore_index=True)
+    combined = combined.drop_duplicates(subset="Name")
+
     return combined
