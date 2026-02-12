@@ -3,18 +3,18 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def generate_thesis(stock_data):
+def generate_tag(stock):
+
     prompt = f"""
-    Analyze this stock for 1-3 year potential.
+    Classify this stock based on data:
 
-    Data:
-    {stock_data}
+    {stock}
 
-    Provide:
-    - 3 Positives
-    - 3 Risks
-    - Expected Return Type (1-2x / 2-3x / 5-10x)
-    - What must go right
+    Output only in this format:
+
+    Profile: (Structural / Acceleration / Early Stage / Cyclical)
+    Asymmetry: (Low / Medium / High)
+    Risk: (One short line only)
     """
 
     response = client.chat.completions.create(
@@ -22,4 +22,4 @@ def generate_thesis(stock_data):
         messages=[{"role": "user", "content": prompt}]
     )
 
-    return response.choices[0].message.content
+    return response.choices[0].message.content.strip()
