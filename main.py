@@ -16,6 +16,10 @@ RSS_FEEDS = [
 MEMORY_FILE = "topic_memory.txt"
 
 
+# ---------------------------
+# Utility Functions
+# ---------------------------
+
 def get_market_headlines():
     headlines = []
     for url in RSS_FEEDS:
@@ -38,6 +42,10 @@ def write_memory(theme):
         f.write(theme + "\n")
 
 
+# ---------------------------
+# Theme Selection
+# ---------------------------
+
 def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
@@ -46,12 +54,12 @@ Based on these Indian market headlines:
 
 {sampled}
 
-Identify ONE specific structural industry or capital cycle theme.
+Identify ONE specific structural capital cycle theme.
 
 Rules:
-- Must be a specific sector (examples: Solar manufacturing, Defence exports, EV battery supply chain, Railway capex, Specialty chemicals, SaaS exports, Data center infrastructure, Capital goods cycle).
-- Avoid generic themes like "market volatility", "global uncertainty", or "economic slowdown".
+- Must be tied to a specific industry (e.g., Solar manufacturing, Life insurance EV growth, Defence exports, AI data center infra, Railway capex, Specialty chemicals).
 - Must involve capital allocation, supply-demand imbalance, pricing cycle, or structural transformation.
+- Avoid generic macro themes.
 - Avoid repeating recently covered themes:
 {memory[-20:]}
 
@@ -66,40 +74,57 @@ Return ONLY the theme title.
     return response.choices[0].message.content.strip()
 
 
-def generate_advanced_lesson(theme):
+# ---------------------------
+# Advanced Allocator Lesson
+# ---------------------------
+
+def generate_allocator_lesson(theme):
 
     prompt = f"""
 Topic: {theme}
 
-Write like a capital allocator evaluating equity compounding potential.
+You are training a serious long-term capital allocator.
 
-Avoid descriptive industry commentary.
-Focus on equity return mechanics.
-
-Force yourself to analyze:
-
-- How capital (float or fixed assets) generates incremental return
-- What combined ratio / pricing threshold changes ROE structurally
-- What capital impairment triggers a hard pricing cycle
-- How book value compounds over 5–10 years
-- Where downside is protected (balance sheet logic)
-- Where capital exits could create pricing power
-- What shifts could expand valuation multiples
+Do NOT write generic industry commentary.
+Do NOT write symbolic equations.
+Focus on equity return mechanics and mispricing.
 
 Structure strictly:
 
 Title:
 
-1. Capital Base & Return Engine (how equity actually compounds)
-2. Pricing Power Threshold That Changes ROE
-3. Soft vs Hard Market Cycle Transition Logic
-4. Book Value Compounding Pathway
-5. Where Equity IRR Inflects
-6. How Capital Flood Creates Long Downcycles
-7. Convexity Setup: Why 5–10x Is Possible (or Not)
-8. Leading Indicators of Cycle Turn
+1. Capital Base & Return Engine
+   - How capital deployed converts into equity compounding.
 
-Be specific. Think in terms of equity IRR, not industry growth.
+2. Structural Thesis
+   - Why returns could structurally expand.
+   - Where ROE / ROCE could inflect.
+
+3. Counter-Thesis
+   - What could structurally impair returns.
+   - Where capital could be destroyed.
+
+4. Valuation Anchor
+   - How this segment is typically valued (P/E, P/B, EV/EBITDA, P/EV etc.).
+   - What growth is implicitly priced in.
+
+5. IRR Pathway
+   - If ROE sustains at X% for 5 years, what book value compounding implies.
+   - Where multiple expansion or compression alters outcomes.
+
+6. Mispricing Test
+   - What conditions would make current pricing irrationally pessimistic?
+   - What would make it euphorically overvalued?
+
+7. Apply This Lens To:
+   - Name 3 Indian listed companies in this theme.
+   - Compare them qualitatively on capital efficiency and valuation posture.
+
+8. Self-Test Question
+   - One question the reader must answer to test conviction.
+
+Think in equity IRR, valuation asymmetry, and capital cycle logic.
+Institutional tone.
 """
 
     response = client.chat.completions.create(
@@ -110,24 +135,29 @@ Be specific. Think in terms of equity IRR, not industry growth.
     return response.choices[0].message.content
 
 
-def generate_weekly_thesis():
+# ---------------------------
+# Weekly Sector Stress Memo
+# ---------------------------
+
+def generate_weekly_allocator_memo():
 
     prompt = """
-Generate an institutional-grade Indian sector thesis.
+Generate a Weekly Capital Allocator Memo for Indian equities.
 
-Focus on:
+Structure:
 
-- Why capital is flowing into this sector
-- Supply-demand imbalance
-- Capital cycle stage
-- ROCE trajectory potential
-- Margin expansion vs compression risk
-- Capital flood risk
-- Monitoring variables
-- What would structurally break the thesis
+Title:
 
-Write like a portfolio manager memo.
-Avoid generic macro commentary.
+1. Sector Showing Capital Inflow
+2. Sector Showing Capital Exit
+3. Which Sector Is Early Cycle?
+4. Which Sector Is Late Cycle?
+5. Valuation Extremes
+6. Where Asymmetry Is Building
+7. Biggest Mispricing Risk
+8. One Sector To Study Deeply This Week
+
+Institutional and analytical.
 """
 
     response = client.chat.completions.create(
@@ -137,23 +167,27 @@ Avoid generic macro commentary.
 
     return response.choices[0].message.content
 
+
+# ---------------------------
+# Monthly Regime Review
+# ---------------------------
 
 def generate_monthly_regime():
 
     prompt = """
 Generate a Capital Market Regime Review for India.
 
-Cover:
+Include:
 
 - Liquidity cycle direction
 - Risk appetite shift
 - Sector capital rotation
 - Valuation compression vs expansion
-- Where capital is withdrawing
-- Where capital is concentrating
-- Early regime shift indicators
+- Retail vs institutional positioning
+- Early signs of regime shift
+- What type of strategy should dominate in this regime
 
-Institutional tone. Analytical.
+Allocator-level tone.
 """
 
     response = client.chat.completions.create(
@@ -164,72 +198,23 @@ Institutional tone. Analytical.
     return response.choices[0].message.content
 
 
-def generate_sector_heatmap():
-
-    prompt = """
-Generate a Quarterly Indian Equity Sector Heatmap.
-
-For each major sector:
-- Capital Cycle Stage (Early / Mid / Late)
-- Margin Direction
-- ROCE Trend
-- Capital Inflow Risk
-- Asymmetry Potential (Low / Medium / High)
-- 2-line reasoning
-
-Concise but analytical.
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
-
-
-def generate_case_study():
-
-    prompt = """
-Provide a deep historical 100x stock case study (India or Global).
-
-Structure:
-
-Title:
-
-1. Initial Industry Structure
-2. Structural Tailwind
-3. Capital Allocation Decisions
-4. ROCE Inflection
-5. Margin Expansion Phase
-6. Severe Drawdown Periods
-7. Why Most Investors Missed It
-8. Lessons for Identifying Future 100x
-
-Analytical. No storytelling fluff.
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
-
+# ---------------------------
+# Position Sizing Module
+# ---------------------------
 
 def generate_position_sizing():
 
     prompt = """
-Generate an institutional note on Position Sizing & Capital Allocation.
+Generate an institutional note on Position Sizing & Risk.
 
 Include:
 
-- Risk of ruin
-- Concentration vs diversification trade-off
-- Asymmetric payoff sizing logic
-- Volatility tolerance vs conviction
-- Capital preservation principles
-- Behavioral traps in sizing decisions
+- Risk of ruin logic
+- Concentration vs diversification tradeoff
+- When to size up aggressively
+- When to cut exposure early
+- Handling 40–60% drawdowns psychologically
+- Sizing asymmetric 10x candidates
 
 Practical. Analytical. No generic advice.
 """
@@ -242,6 +227,10 @@ Practical. Analytical. No generic advice.
     return response.choices[0].message.content
 
 
+# ---------------------------
+# Main Execution Logic
+# ---------------------------
+
 def main():
 
     today = datetime.today()
@@ -249,48 +238,34 @@ def main():
     day = today.day
     month = today.month
 
-    # Quarterly Heatmap (Jan, Apr, Jul, Oct 1st)
-    if day == 1 and month in [1, 4, 7, 10]:
-        content = generate_sector_heatmap()
-        subject = "100X Quarterly — Sector Heatmap"
-        send_email(content, subject)
-        return
-
-    # Monthly Regime Review (1st of every month)
+    # Monthly Regime (1st of month)
     if day == 1:
         content = generate_monthly_regime()
         subject = "100X Monthly — Capital Regime Review"
         send_email(content, subject)
         return
 
-    # Sunday Weekly Thesis
+    # Sunday Weekly Memo
     if weekday == 6:
-        content = generate_weekly_thesis()
-        subject = "100X Weekly — Institutional Sector Thesis"
+        content = generate_weekly_allocator_memo()
+        subject = "100X Weekly — Allocator Stress Memo"
         send_email(content, subject)
         return
 
     # Friday Position Sizing
     if weekday == 4:
         content = generate_position_sizing()
-        subject = "100X — Position Sizing & Capital Allocation"
+        subject = "100X — Position Sizing & Risk Discipline"
         send_email(content, subject)
         return
 
-    # Quarterly Case Study (15th of quarter months)
-    if day == 15 and month in [1, 4, 7, 10]:
-        content = generate_case_study()
-        subject = "100X Case Study — Historical 100x Dissection"
-        send_email(content, subject)
-        return
-
-    # Default Daily Advanced
+    # Default Daily Allocator Lesson
     headlines = get_market_headlines()
     memory = read_memory()
     theme = pick_theme(headlines, memory)
-    lesson = generate_advanced_lesson(theme)
+    lesson = generate_allocator_lesson(theme)
     write_memory(theme)
-    subject = f"100X Advanced — {theme}"
+    subject = f"100X Allocator — {theme}"
     send_email(lesson, subject)
 
 
