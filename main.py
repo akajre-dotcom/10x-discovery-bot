@@ -68,40 +68,41 @@ Return ONLY the theme title.
 
 def generate_advanced_lesson(theme):
 
-    prompt = f"""
+prompt = f"""
 Topic: {theme}
 
-Write like a fund manager evaluating capital allocation asymmetry.
+Write like a portfolio manager thinking in capital allocation math.
 
-Avoid industry description.
-Avoid surface-level explanations.
+No industry overview.
+No definitions.
+No generic explanation.
 
-Focus on:
+Think in equations and capital flows.
 
-- Supply-demand imbalance in capital
-- Pricing power cycles
-- Combined ratio / ROCE sensitivity
-- Where incremental capital earns > cost of capital
-- Where capital floods destroy returns
-- Float economics (if financial sector)
-- Operating leverage thresholds
-- Balance sheet optionality
+Force yourself to answer:
+
+- Where does free cash flow inflect?
+- What operating margin threshold changes equity returns?
+- What capital intensity assumption drives ROCE?
+- What valuation multiple compression/expansion changes asymmetry?
+- What funding environment shift alters survival probability?
 
 Structure strictly:
 
 Title:
 
-1. Capital Structure of the Industry
-2. Where Returns Are Actually Earned (math logic)
-3. Current Capital Cycle Stage (with reasoning)
-4. ROCE / ROE Sensitivity Drivers
-5. When This Becomes a Hard Pricing Environment
-6. Where Capital Gets Destroyed
-7. What Structural Shift Could Create 5–10x Equity Outcome
-8. Monitoring Variables That Matter (not generic KPIs)
+1. Capital Deployed vs Capital Returned (cash flow logic)
+2. Unit Economics Thresholds That Change Equity Outcomes
+3. Capital Cycle Funding Conditions (easy vs tight money)
+4. Operating Leverage Inflection Point
+5. ROCE / FCF Expansion Pathway
+6. How Capital Flood Destroys Returns
+7. What Precise Metrics Must Improve For 5–10x
+8. Early Warning Indicators of Thesis Breakdown
 
-Dense. Analytical. Think in terms of capital, not technology.
+Be precise. Analytical. Think like allocator, not operator.
 """
+
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
