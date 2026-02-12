@@ -68,38 +68,39 @@ Return ONLY the theme title.
 
 def generate_advanced_lesson(theme):
 
-    prompt = f"""
+prompt = f"""
 Topic: {theme}
 
-Write like a hedge fund portfolio manager training a serious analyst.
+Write like a fund manager evaluating capital allocation asymmetry.
 
-Do NOT write generic macro commentary.
-Do NOT give textbook definitions.
-Be analytical and capital-cycle focused.
+Avoid industry description.
+Avoid surface-level explanations.
 
-Focus strictly on:
-- Real unit economics
-- Capital intensity
-- Supply-demand imbalance
-- Competitive structure
-- ROCE expansion pathway
-- Operating leverage inflection
-- Where capital destruction risk hides
+Focus on:
+
+- Supply-demand imbalance in capital
+- Pricing power cycles
+- Combined ratio / ROCE sensitivity
+- Where incremental capital earns > cost of capital
+- Where capital floods destroy returns
+- Float economics (if financial sector)
+- Operating leverage thresholds
+- Balance sheet optionality
 
 Structure strictly:
 
 Title:
 
-1. Structural Context (why this industry now)
-2. Value Chain Economics (who captures value)
-3. Unit Economics Deep Dive (margin math & cost drivers)
-4. Capital Cycle Position (early/mid/late with reasoning)
-5. Competitive Advantage Formation
-6. ROCE Expansion Pathway
-7. What Destroys Returns Here
-8. Conditions Required for 5–10x Outcome
+1. Capital Structure of the Industry
+2. Where Returns Are Actually Earned (math logic)
+3. Current Capital Cycle Stage (with reasoning)
+4. ROCE / ROE Sensitivity Drivers
+5. When This Becomes a Hard Pricing Environment
+6. Where Capital Gets Destroyed
+7. What Structural Shift Could Create 5–10x Equity Outcome
+8. Monitoring Variables That Matter (not generic KPIs)
 
-Dense. Analytical. Institutional tone.
+Dense. Analytical. Think in terms of capital, not technology.
 No motivational language.
 """
 
