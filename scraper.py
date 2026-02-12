@@ -35,12 +35,13 @@ def fetch_screen(screen_name, base_url):
             if len(cols) > 5:
                 all_data.append({
                     "Name": cols[0],
+                    "MarketCap": extract_number(cols[1]),
                     "SalesGrowth": extract_number(cols[2]),
                     "ProfitGrowth": extract_number(cols[3]),
                     "ROCE": extract_number(cols[4]),
                     "Bucket": screen_name
-                    "MarketCap": extract_number(cols[1]),
                 })
+
 
         page += 1
 
