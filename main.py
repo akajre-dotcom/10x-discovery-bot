@@ -42,13 +42,13 @@ def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
     prompt = f"""
-    Based on these current Indian market headlines:
+    Based on these Indian market headlines:
 
     {sampled}
 
-    Identify ONE structural capital cycle or industry transformation theme.
+    Identify ONE structural capital cycle or transformation theme.
     Avoid repeating recently covered themes:
-    {memory[-15:]}
+    {memory[-20:]}
 
     Return only the theme title.
     """
@@ -62,30 +62,128 @@ def pick_theme(headlines, memory):
 
 
 def generate_advanced_lesson(theme):
-
     prompt = f"""
     Topic: {theme}
 
-    You are training a professional long-term capital allocator.
-
     Generate an ADVANCED institutional-grade structural investing note.
 
-    Structure strictly:
+    Structure:
 
-    Title:
-
-    1. Structural Context (macro + capital flow positioning)
-    2. Industry Value Chain Breakdown
+    1. Structural Context
+    2. Industry Value Chain
     3. Unit Economics & Operating Leverage
-    4. Capital Cycle Positioning (early/mid/late)
+    4. Capital Cycle Positioning
     5. Competitive Advantage Formation
-    6. Margin Expansion / Compression Drivers
+    6. Margin Drivers
     7. Failure & Regime Shift Scenarios
-    8. Investor Edge Framework (what differentiates alpha here)
-    9. What Must Be True For 5–10x Outcome
+    8. Investor Edge Framework
+    9. Conditions for 5–10x Outcome
+    """
 
-    Keep dense, analytical, non-generic.
-    Avoid motivational language.
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_weekly_thesis():
+    prompt = """
+    Generate a deep institutional sector thesis for India.
+
+    Structure:
+
+    1. Why Now
+    2. Demand Drivers
+    3. Policy Impact
+    4. Capital Cycle Stage
+    5. Competitive Structure
+    6. Margin Outlook
+    7. Risks
+    8. Monitoring Checklist
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_monthly_regime():
+    prompt = """
+    Generate a Capital Market Regime Review for India.
+
+    Include:
+    - Liquidity Conditions
+    - Sector Rotation
+    - Risk Appetite
+    - Valuation Compression/Expansion
+    - Early Signals of Capital Shift
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_sector_heatmap():
+    prompt = """
+    Generate a Quarterly Sector Heatmap for Indian equities.
+
+    For each major sector:
+    - Capital Cycle Stage (Early/Mid/Late)
+    - Margin Trend (Expanding/Flat/Contracting)
+    - Risk Level (Low/Moderate/High)
+    - Asymmetry Potential (Low/Medium/High)
+    - Brief 2-line explanation
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_case_study():
+    prompt = """
+    Provide a deep historical 100x case study (Indian or Global).
+
+    Structure:
+    - Company Background
+    - Structural Tailwind
+    - Capital Allocation Decisions
+    - Inflection Point
+    - Margin Expansion Path
+    - Key Risk Periods
+    - Lessons for Identifying Future 100x
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def generate_position_sizing():
+    prompt = """
+    Generate an advanced lesson on Position Sizing Psychology.
+
+    Include:
+    - Kelly Criterion intuition
+    - Asymmetry vs conviction
+    - Risk of ruin
+    - Concentration vs diversification
+    - Handling volatility without overreaction
     """
 
     response = client.chat.completions.create(
@@ -98,16 +196,53 @@ def generate_advanced_lesson(theme):
 
 def main():
 
+    today = datetime.today()
+    weekday = today.weekday()
+    day = today.day
+    month = today.month
+
+    # Quarterly Sector Heatmap (Jan/Apr/Jul/Oct on 1st)
+    if day == 1 and month in [1, 4, 7, 10]:
+        content = generate_sector_heatmap()
+        subject = "100X Quarterly — Sector Heatmap"
+        send_email(content, subject)
+        return
+
+    # Monthly Capital Regime
+    if day == 1:
+        content = generate_monthly_regime()
+        subject = "100X Monthly — Capital Regime Review"
+        send_email(content, subject)
+        return
+
+    # Sunday Weekly Thesis
+    if weekday == 6:
+        content = generate_weekly_thesis()
+        subject = "100X Weekly — Institutional Sector Thesis"
+        send_email(content, subject)
+        return
+
+    # Friday Position Sizing
+    if weekday == 4:
+        content = generate_position_sizing()
+        subject = "100X — Position Sizing & Psychology"
+        send_email(content, subject)
+        return
+
+    # Mid-quarter Case Study (15th of quarter months)
+    if day == 15 and month in [1, 4, 7, 10]:
+        content = generate_case_study()
+        subject = "100X Case Study — Historical 100x Dissection"
+        send_email(content, subject)
+        return
+
+    # Default Daily Advanced
     headlines = get_market_headlines()
     memory = read_memory()
-
     theme = pick_theme(headlines, memory)
     lesson = generate_advanced_lesson(theme)
-
     write_memory(theme)
-
     subject = f"100X Advanced — {theme}"
-
     send_email(lesson, subject)
 
 
