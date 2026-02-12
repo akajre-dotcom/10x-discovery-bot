@@ -68,7 +68,7 @@ Return ONLY the theme title.
 
 def generate_advanced_lesson(theme):
 
-prompt = f"""
+    prompt = f"""
 Topic: {theme}
 
 Write like a fund manager evaluating capital allocation asymmetry.
@@ -101,7 +101,6 @@ Title:
 8. Monitoring Variables That Matter (not generic KPIs)
 
 Dense. Analytical. Think in terms of capital, not technology.
-No motivational language.
 """
 
     response = client.chat.completions.create(
@@ -110,7 +109,6 @@ No motivational language.
     )
 
     return response.choices[0].message.content
-
 
 def generate_weekly_thesis():
     prompt = """
