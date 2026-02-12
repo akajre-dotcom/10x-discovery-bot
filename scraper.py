@@ -38,14 +38,22 @@ def fetch_screen(screen_name, base_url):
         if table is None:
             break
 
-        headers_row = [th.text.strip() for th in table.find("thead").find_all("th")]
-        rows = table.find("tbody").find_all("tr")
+        # Extract header row safely
+        header_row = table.find("tr")
+        if header_row is None:
+            break
 
+        headers_row = [th.text.strip() for th in header_row.find_all("th")]
+
+        rows = table.find_all("tr")[1:]
         if not rows:
             break
 
         for row in rows:
             cols = [col.text.strip() for col in row.find_all("td")]
+            if not cols:
+                continue
+
             row_dict = dict(zip(headers_row, cols))
 
             all_data.append({
@@ -62,6 +70,7 @@ def fetch_screen(screen_name, base_url):
         page += 1
 
     return pd.DataFrame(all_data)
+
 
 
 def get_all_data():
