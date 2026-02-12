@@ -1,21 +1,15 @@
-import os
-from openai import OpenAI
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def generate_tag(stock):
 
     prompt = f"""
-    Classify this stock based on financial metrics.
+    A stock has been shortlisted from the '{stock['Bucket']}' category.
 
-    Data:
-    {stock}
+    Classify it.
 
-    Output ONLY in this exact format:
+    Output strictly:
 
     Profile: (Structural / Acceleration / Early Stage / Cyclical)
     Asymmetry: (Low / Medium / High)
-    Risk: (One short line only)
+    Risk: (One sharp sentence only)
     """
 
     response = client.chat.completions.create(
