@@ -3,6 +3,7 @@ import feedparser
 from openai import OpenAI
 from emailer import send_email
 
+# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 RSS_FEEDS = [
@@ -32,11 +33,10 @@ def get_headlines():
 # ----------------------------
 
 def read_memory():
-    try:
-        with open(MEMORY_FILE, "r") as f:
-            return f.read().splitlines()
-    except:
+    if not os.path.exists(MEMORY_FILE):
         return []
+    with open(MEMORY_FILE, "r") as f:
+        return f.read().splitlines()
 
 
 def write_memory(topic):
@@ -45,7 +45,39 @@ def write_memory(topic):
 
 
 # ----------------------------
-# Select Structural Industrial Theme
+# Select Structural Theme
+# ----------------------------
+
+def pick_structural_theme(headlines, memory):
+
+    prompt = f"""
+From these recent headlines:
+
+{headlines}
+
+Identify ONE emerging or structurally important industrial system,
+technology, manufacturing ecosystem, or infrastructure segment.
+
+Rules:
+- Must be product/system level (not macro like inflation).
+- Must involve real assets, technology, supply chains, or industrial capability.
+- Focus on NEW or evolving developments.
+- Avoid repeating recently covered topics:
+{memory[-15:]}
+
+Return only the system name.
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content.strip()
+
+
+# ----------------------------
+# Generate Deep Research
 # ----------------------------
 
 def generate_deep_research(system):
@@ -97,7 +129,6 @@ Write like someone allocating real capital.
     )
 
     return response.choices[0].message.content
-
 
 
 # ----------------------------
