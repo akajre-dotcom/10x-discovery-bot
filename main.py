@@ -82,37 +82,47 @@ Return only the system name.
 
 def generate_deep_research(system):
 
-    prompt = f"""
+prompt = f"""
 System: {system}
 
-Write a deep industrial research paper explaining this entire system.
+Write a deep industrial research paper explaining this system.
 
-This must feel like serious research, not a newsletter.
+But this must end with capital allocation clarity.
 
 Explain thoroughly:
 
-- What this system technically does
-- How it physically works (engineering basics)
-- Major components and process flow
-- Global value chain structure
-- India's role in this ecosystem
+- What the system technically does
+- How it physically works
+- Full value chain
 - Where value and margins concentrate
 - Which layers are commoditized
-- Capital intensity across layers
-- Entry barriers and bottlenecks
+- Capital intensity by layer
+- Entry barriers
+- Bottlenecks and control points
 - Substitution risks
-- Policy and geopolitical exposure
-- Historical evolution of this industry
-- What changed recently to make it newsworthy
+- Historical industry evolution
+- What changed recently to make this relevant
 - 1–5 year structural outlook
-- Where 10x–100x wealth could realistically be created
-- Where capital will likely be destroyed
 
-Write clearly and deeply.
-No bullet-point frameworks unless necessary.
-Avoid generic business language.
-Assume reader wants true industrial mastery.
+Then answer decisively:
+
+CAPITAL ALLOCATION VIEW
+
+- Is this system structurally monetizable or utility-like?
+- Where exactly does profit pool sit?
+- Which layer has durable pricing power?
+- Which layer will destroy capital?
+- Who indirectly benefits most?
+- Is this early-cycle, mid-cycle, or late-cycle?
+- If you had to allocate serious capital, which layer would you focus on?
+- What would invalidate the thesis?
+
+Be decisive.
+Do not stay neutral.
+Do not hedge everything.
+Write like someone allocating real capital.
 """
+
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
