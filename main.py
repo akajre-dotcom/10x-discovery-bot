@@ -16,9 +16,9 @@ RSS_FEEDS = [
 MEMORY_FILE = "topic_memory.txt"
 
 
-# ---------------------------
-# Utility Functions
-# ---------------------------
+# ----------------------------
+# Utility
+# ----------------------------
 
 def get_market_headlines():
     headlines = []
@@ -42,28 +42,35 @@ def write_memory(theme):
         f.write(theme + "\n")
 
 
-# ---------------------------
-# Theme Selection
-# ---------------------------
+# ----------------------------
+# Theme Selector
+# ----------------------------
 
 def pick_theme(headlines, memory):
     sampled = random.sample(headlines, min(5, len(headlines)))
 
     prompt = f"""
-Based on these Indian market headlines:
+From these Indian market headlines:
 
 {sampled}
 
-Identify ONE specific structural capital cycle theme.
+Choose ONE very specific sub-segment.
+
+Examples:
+- Indian life insurance EV growth
+- Defence electronics exports
+- Solar module manufacturing (not renewables broadly)
+- IT services margin cycle
+- Railway EPC order cycle
+- AI data center capex in India
 
 Rules:
-- Must be tied to a specific industry (e.g., Solar manufacturing, Life insurance EV growth, Defence exports, AI data center infra, Railway capex, Specialty chemicals).
-- Must involve capital allocation, supply-demand imbalance, pricing cycle, or structural transformation.
-- Avoid generic macro themes.
-- Avoid repeating recently covered themes:
+- No broad sectors.
+- Must relate to capital cycle or structural return shift.
+- Avoid recently used:
 {memory[-20:]}
 
-Return ONLY the theme title.
+Return only the sub-segment title.
 """
 
     response = client.chat.completions.create(
@@ -74,90 +81,68 @@ Return ONLY the theme title.
     return response.choices[0].message.content.strip()
 
 
-# ---------------------------
-# Advanced Allocator Lesson
-# ---------------------------
+# ----------------------------
+# Core Allocator Engine
+# ----------------------------
 
-def generate_allocator_lesson(theme):
+def generate_allocator_note(theme):
 
     prompt = f"""
-Topic: {theme}
+Sub-segment: {theme}
 
-You are training a serious long-term capital allocator.
+Write like a concentrated equity fund manager deciding whether to allocate 20% of portfolio capital here.
 
-Do NOT write generic industry commentary.
-Do NOT write symbolic equations.
-Focus on equity return mechanics and mispricing.
+No textbook language.
+No general sector overview.
+No symbolic math.
 
-Structure strictly:
-
-Title:
-
-1. Capital Base & Return Engine
-   - How capital deployed converts into equity compounding.
-
-2. Structural Thesis
-   - Why returns could structurally expand.
-   - Where ROE / ROCE could inflect.
-
-3. Counter-Thesis
-   - What could structurally impair returns.
-   - Where capital could be destroyed.
-
-4. Valuation Anchor
-   - How this segment is typically valued (P/E, P/B, EV/EBITDA, P/EV etc.).
-   - What growth is implicitly priced in.
-
-5. IRR Pathway
-   - If ROE sustains at X% for 5 years, what book value compounding implies.
-   - Where multiple expansion or compression alters outcomes.
-
-6. Mispricing Test
-   - What conditions would make current pricing irrationally pessimistic?
-   - What would make it euphorically overvalued?
-
-7. Apply This Lens To:
-   - Name 3 Indian listed companies in this theme.
-   - Compare them qualitatively on capital efficiency and valuation posture.
-
-8. Self-Test Question
-   - One question the reader must answer to test conviction.
-
-Think in equity IRR, valuation asymmetry, and capital cycle logic.
-Institutional tone.
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
-
-
-# ---------------------------
-# Weekly Sector Stress Memo
-# ---------------------------
-
-def generate_weekly_allocator_memo():
-
-    prompt = """
-Generate a Weekly Capital Allocator Memo for Indian equities.
+Force specificity and judgment.
 
 Structure:
 
-Title:
+TITLE
 
-1. Sector Showing Capital Inflow
-2. Sector Showing Capital Exit
-3. Which Sector Is Early Cycle?
-4. Which Sector Is Late Cycle?
-5. Valuation Extremes
-6. Where Asymmetry Is Building
-7. Biggest Mispricing Risk
-8. One Sector To Study Deeply This Week
+1. What Is The Real Return Engine?
+   - How does equity compound here?
+   - What variable actually drives sustained ROE?
 
-Institutional and analytical.
+2. Where Is This In The Capital Cycle?
+   - Early / Mid / Late?
+   - What evidence supports this?
+   - Is capital entering or exiting?
+
+3. What Is The Market Pricing In?
+   - Typical valuation multiple in India
+   - What growth rate seems implied
+   - Is that assumption aggressive or conservative?
+
+4. 5-Year IRR Scenarios
+   - Base case
+   - Bull case
+   - Bear case
+   - What breaks in each?
+
+5. Where Capital Gets Destroyed
+   - Specific mechanism
+   - Historical pattern if relevant
+
+6. 3-Company Comparison (India)
+   Name three listed companies.
+   For each:
+   - Capital efficiency quality (High / Medium / Low)
+   - Valuation risk (High / Medium / Low)
+   - Asymmetry (High / Medium / Low)
+   - One-line allocator view
+
+7. Decision Pressure
+   - Would you allocate 20% today? Yes or No.
+   - What must you believe to do so?
+   - What would make you walk away?
+
+Tone:
+Direct.
+Judgmental.
+Allocator mindset.
 """
 
     response = client.chat.completions.create(
@@ -168,26 +153,53 @@ Institutional and analytical.
     return response.choices[0].message.content
 
 
-# ---------------------------
-# Monthly Regime Review
-# ---------------------------
+# ----------------------------
+# Weekly Memo
+# ----------------------------
+
+def generate_weekly_memo():
+
+    prompt = """
+Write a weekly Indian equity allocator memo.
+
+Include:
+
+1. One sector in early capital cycle
+2. One sector in late cycle
+3. One valuation extreme
+4. One mispricing risk
+5. One area worth deep research
+
+Be decisive.
+No macro fluff.
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+# ----------------------------
+# Monthly Regime
+# ----------------------------
 
 def generate_monthly_regime():
 
     prompt = """
-Generate a Capital Market Regime Review for India.
+Write a capital market regime assessment for India.
 
-Include:
+Cover:
 
-- Liquidity cycle direction
-- Risk appetite shift
-- Sector capital rotation
-- Valuation compression vs expansion
-- Retail vs institutional positioning
-- Early signs of regime shift
-- What type of strategy should dominate in this regime
+- Liquidity direction
+- Risk appetite
+- Where capital is concentrating
+- Where capital is exiting
+- What style is likely to outperform next 6 months
 
-Allocator-level tone.
+Allocator tone.
 """
 
     response = client.chat.completions.create(
@@ -198,25 +210,29 @@ Allocator-level tone.
     return response.choices[0].message.content
 
 
-# ---------------------------
-# Position Sizing Module
-# ---------------------------
+# ----------------------------
+# Position Sizing Discipline
+# ----------------------------
 
 def generate_position_sizing():
 
     prompt = """
-Generate an institutional note on Position Sizing & Risk.
+Write a note on concentrated portfolio construction.
 
-Include:
+Assume 8–12 stock portfolio.
 
-- Risk of ruin logic
-- Concentration vs diversification tradeoff
-- When to size up aggressively
-- When to cut exposure early
-- Handling 40–60% drawdowns psychologically
-- Sizing asymmetric 10x candidates
+Cover:
 
-Practical. Analytical. No generic advice.
+1. Core compounders vs cyclicals vs moonshots
+2. When 20–30% allocation is justified
+3. Handling 50% drawdowns in structural winners
+4. When to average down vs exit
+5. Why most investors under-size 5–10x outcomes
+6. Biggest psychological mistake in concentration
+
+No stop-loss discussion.
+No trading language.
+Allocator discipline only.
 """
 
     response = client.chat.completions.create(
@@ -227,46 +243,45 @@ Practical. Analytical. No generic advice.
     return response.choices[0].message.content
 
 
-# ---------------------------
-# Main Execution Logic
-# ---------------------------
+# ----------------------------
+# Execution Logic
+# ----------------------------
 
 def main():
 
     today = datetime.today()
     weekday = today.weekday()
     day = today.day
-    month = today.month
 
-    # Monthly Regime (1st of month)
+    # Monthly
     if day == 1:
         content = generate_monthly_regime()
-        subject = "100X Monthly — Capital Regime Review"
+        subject = "100X — Capital Regime Review"
         send_email(content, subject)
         return
 
-    # Sunday Weekly Memo
+    # Sunday weekly
     if weekday == 6:
-        content = generate_weekly_allocator_memo()
-        subject = "100X Weekly — Allocator Stress Memo"
+        content = generate_weekly_memo()
+        subject = "100X — Weekly Allocator Memo"
         send_email(content, subject)
         return
 
-    # Friday Position Sizing
+    # Friday sizing
     if weekday == 4:
         content = generate_position_sizing()
-        subject = "100X — Position Sizing & Risk Discipline"
+        subject = "100X — Portfolio Construction Discipline"
         send_email(content, subject)
         return
 
-    # Default Daily Allocator Lesson
+    # Daily allocator deep dive
     headlines = get_market_headlines()
     memory = read_memory()
     theme = pick_theme(headlines, memory)
-    lesson = generate_allocator_lesson(theme)
+    note = generate_allocator_note(theme)
     write_memory(theme)
-    subject = f"100X Allocator — {theme}"
-    send_email(lesson, subject)
+    subject = f"100X — {theme}"
+    send_email(note, subject)
 
 
 if __name__ == "__main__":
