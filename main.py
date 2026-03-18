@@ -3,124 +3,152 @@ import feedparser
 from openai import OpenAI
 from emailer import send_email
 
-# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-RSS_FEEDS = [
-    "https://www.moneycontrol.com/rss/business.xml",
-    "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
-    "https://www.livemint.com/rss/markets"
+# ----------------------------
+# Brands (Expanded)
+# ----------------------------
+
+BRANDS = [
+    "Titan", "Tanishq", "CaratLane",
+    "Kalyan Jewellers", "Malabar Gold",
+    "PNG Jewellers", "PC Jeweller",
+    "Kisna", "Bluestone", "Giva"
 ]
 
-MEMORY_FILE = "topic_memory.txt"
+# ----------------------------
+# Launch Keywords (STRICT FILTER)
+# ----------------------------
+
+LAUNCH_KEYWORDS = [
+    "launch", "introduces", "unveils", "new collection",
+    "new range", "campaign", "ad campaign",
+    "festive collection", "bridal collection",
+    "diamond collection", "gold collection",
+    "limited edition", "drops", "release"
+]
+
+# ----------------------------
+# RSS Sources
+# ----------------------------
+
+BASE_FEEDS = [
+    "https://www.moneycontrol.com/rss/business.xml",
+    "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms",
+    "https://www.livemint.com/rss/companies",
+]
+
+# ----------------------------
+# Google News Feeds (CRITICAL)
+# ----------------------------
+
+def generate_google_news_feeds():
+    feeds = []
+    for brand in BRANDS:
+        query = brand.replace(" ", "+") + "+jewellery+launch"
+        url = f"https://news.google.com/rss/search?q={query}"
+        feeds.append(url)
+    return feeds
 
 
 # ----------------------------
-# Get Latest Headlines
+# Memory
 # ----------------------------
 
-def get_headlines():
-    headlines = []
-    for url in RSS_FEEDS:
-        feed = feedparser.parse(url)
-        for entry in feed.entries[:12]:
-            headlines.append(entry.title)
-    return headlines
-
-
-# ----------------------------
-# Topic Memory (avoid repeat)
-# ----------------------------
+MEMORY_FILE = "seen_links.txt"
 
 def read_memory():
     if not os.path.exists(MEMORY_FILE):
-        return []
+        return set()
     with open(MEMORY_FILE, "r") as f:
-        return f.read().splitlines()
+        return set(f.read().splitlines())
 
 
-def write_memory(topic):
+def write_memory(links):
     with open(MEMORY_FILE, "a") as f:
-        f.write(topic + "\n")
+        for link in links:
+            f.write(link + "\n")
 
 
 # ----------------------------
-# Select Structural Theme
+# Fetch News
 # ----------------------------
 
-def pick_structural_theme(headlines, memory):
+def fetch_all_articles():
+    feeds = BASE_FEEDS + generate_google_news_feeds()
+    articles = []
+
+    for url in feeds:
+        feed = feedparser.parse(url)
+
+        for entry in feed.entries[:20]:
+            articles.append({
+                "title": entry.title,
+                "link": entry.link,
+                "summary": getattr(entry, "summary", "")
+            })
+
+    return articles
+
+
+# ----------------------------
+# Filter: Brand + Launch Intent
+# ----------------------------
+
+def is_launch_related(text):
+    text = text.lower()
+    return any(keyword in text for keyword in LAUNCH_KEYWORDS)
+
+
+def filter_articles(articles, seen_links):
+    filtered = []
+
+    for a in articles:
+        if a["link"] in seen_links:
+            continue
+
+        combined = (a["title"] + " " + a["summary"]).lower()
+
+        if any(b.lower() in combined for b in BRANDS) and is_launch_related(combined):
+            filtered.append(a)
+
+    return filtered
+
+
+# ----------------------------
+# GPT: Extract Launch Intelligence
+# ----------------------------
+
+def extract_launch_intel(articles):
+
+    if not articles:
+        return "No jewellery product launches detected today."
 
     prompt = f"""
-From these recent headlines:
+You are tracking product launches in the jewellery market.
 
-{headlines}
+For each item:
+- Identify the PRODUCT or COLLECTION launched
+- Brand name
+- Type (bridal, diamond, daily wear, premium, etc.)
+- What makes it different (design, pricing, positioning)
+- Whether it is part of a campaign or seasonal push
+- Keep link
 
-Identify ONE emerging or structurally important industrial system,
-technology, manufacturing ecosystem, or infrastructure segment.
+Articles:
+{articles}
 
-Rules:
-- Must be product/system level (not macro like inflation).
-- Must involve real assets, technology, supply chains, or industrial capability.
-- Focus on NEW or evolving developments.
-- Avoid repeating recently covered topics:
-{memory[-15:]}
+Output format:
 
-Return only the system name.
-"""
+Brand:
+Launch:
+Category:
+Details:
+Strategic Intent:
+Link:
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content.strip()
-
-
-# ----------------------------
-# Generate Deep Research
-# ----------------------------
-
-def generate_deep_research(system):
-
-    prompt = f"""
-System: {system}
-
-Write a deep industrial research paper explaining this system.
-
-But this must end with capital allocation clarity.
-
-Explain thoroughly:
-
-- What the system technically does
-- How it physically works
-- Full value chain
-- Where value and margins concentrate
-- Which layers are commoditized
-- Capital intensity by layer
-- Entry barriers
-- Bottlenecks and control points
-- Substitution risks
-- Historical industry evolution
-- What changed recently to make this relevant
-- 1–5 year structural outlook
-
-Then answer decisively:
-
-CAPITAL ALLOCATION VIEW
-
-- Is this system structurally monetizable or utility-like?
-- Where exactly does profit pool sit?
-- Which layer has durable pricing power?
-- Which layer will destroy capital?
-- Who indirectly benefits most?
-- Is this early-cycle, mid-cycle, or late-cycle?
-- If you had to allocate serious capital, which layer would you focus on?
-- What would invalidate the thesis?
-
-Be decisive.
-Do not stay neutral.
-Do not hedge everything.
-Write like someone allocating real capital.
+Only include REAL launches or collections.
+Ignore generic business news.
 """
 
     response = client.chat.completions.create(
@@ -132,21 +160,23 @@ Write like someone allocating real capital.
 
 
 # ----------------------------
-# Main Execution
+# Main
 # ----------------------------
 
 def main():
 
-    headlines = get_headlines()
-    memory = read_memory()
+    articles = fetch_all_articles()
+    seen_links = read_memory()
 
-    system = pick_structural_theme(headlines, memory)
-    research = generate_deep_research(system)
+    launch_articles = filter_articles(articles, seen_links)
 
-    write_memory(system)
+    report = extract_launch_intel(launch_articles)
 
-    subject = f"Industrial Research — {system}"
-    send_email(research, subject)
+    new_links = [a["link"] for a in launch_articles]
+    write_memory(new_links)
+
+    subject = "Jewellery Product Launch Tracker — Daily"
+    send_email(report, subject)
 
 
 if __name__ == "__main__":
