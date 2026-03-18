@@ -28,6 +28,7 @@ jobs:
           pip install openai feedparser requests beautifulsoup4
 
       - name: Run Market Intelligence Bot
+        # This is the exact bridge that hands the passwords to your python script!
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
