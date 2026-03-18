@@ -2,19 +2,17 @@ name: 100X Learning Bot
 
 on:
   schedule:
-    # Runs automatically every day at 02:00 UTC (07:30 AM IST). 
-    # You can change these numbers to adjust the time.
     - cron: '0 2 * * *'
-  workflow_dispatch: # Gives you the "Run workflow" button to test it manually
-
-env:
-  # This entirely removes the annoying Node.js 20 deprecation warning
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     
+    # This forces the runner to use Node 24 and stops the deprecation warning
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,10 +29,8 @@ jobs:
 
       - name: Run Market Intelligence Bot
         env:
-          # This securely injects your passwords from GitHub Secrets into your script
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
-          # Replace 'main.py' with the actual name of your python file if it is different
           python main.py
