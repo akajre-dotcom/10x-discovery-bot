@@ -142,16 +142,17 @@ def extract_launch_intel(articles):
     You are an elite Market Intelligence Analyst for the global jewellery industry.
     Review the following news articles and extract actual product launches, new collections, or major design trends. 
     
-    Categorize them into 'Indian Market' and 'Global Market'.
+    Categorize them under '### Indian Market' and '### Global Market'.
     
-    For each valid launch, provide:
-    - **Brand**: 
-    - **Collection/Product**:
-    - **Category**: (e.g., Bridal, High Jewelry, Lab-Grown, Daily Wear)
-    - **Market Intel**: What makes this launch unique? (e.g., pricing, target audience, materials, sustainability)
-    - **Link**: 
+    Instead of long lists, compress each launch into a single, highly readable bullet point. 
+    Format strictly like this example:
+    * **Brand Name** launched **Product Name** in the Category segment to [briefly explain the purpose/intel]. **Strategic Impact:** [1 concise sentence analyzing how this shifts competitive positioning, supply chain/sourcing dynamics, or market share]. [Source](insert_the_link_here)
 
-    Ignore generic financial news, stock updates, or executive changes unless accompanied by a product launch.
+    Rules:
+    - NEVER output raw URLs. Always hide the URL inside a clean markdown link like this: [Source](url).
+    - Combine the brand, product, category, and intel into one flowing narrative sentence.
+    - Keep it dense and concise so maximum data fits into a quick-read email.
+    - Ignore generic financial news.
 
     Articles to analyze:
     {articles_text}
@@ -161,7 +162,7 @@ def extract_launch_intel(articles):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a concise, highly analytical market intelligence bot."},
+                {"role": "system", "content": "You are a concise, highly analytical market intelligence bot. You write dense, professional summaries."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3
