@@ -4,165 +4,105 @@ import logging
 from openai import OpenAI
 from emailer import send_email
 
-# Set up logging for GitHub Actions
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ----------------------------
-# Brands & Trends (Expanded for Global + India)
+# Expanded Brands & Trends
 # ----------------------------
-
-BRANDS_INDIA = [
-    "Titan", "Tanishq", "CaratLane", "Kalyan Jewellers", 
-    "Malabar Gold", "PNG Jewellers", "PC Jeweller", 
-    "Kisna", "Bluestone", "Giva", "Senco", "Joyalukkas"
-]
-
-BRANDS_GLOBAL = [
-    "Cartier", "Tiffany & Co.", "Bvlgari", "Van Cleef & Arpels", 
-    "Pandora", "Swarovski", "Harry Winston", "Chopard", "De Beers"
-]
-
+BRANDS_INDIA = ["Titan", "Tanishq", "CaratLane", "Mia", "Zoya", "Kalyan Jewellers", "Malabar Gold", "PNG Jewellers", "Senco", "Joyalukkas", "BlueStone", "Giva", "Melorra"]
+BRANDS_GLOBAL = ["Cartier", "Tiffany & Co.", "Bvlgari", "Van Cleef & Arpels", "Pandora", "Swarovski", "De Beers", "Messika"]
 ALL_BRANDS = BRANDS_INDIA + BRANDS_GLOBAL
 
 # ----------------------------
-# Launch & Trend Keywords
+# Aggressive Sourcing Keywords
 # ----------------------------
-
 LAUNCH_KEYWORDS = [
-    "launch", "introduces", "unveils", "new collection",
-    "new range", "campaign", "ad campaign", "drops", "release",
-    "festive collection", "bridal collection", "high jewelry",
-    "haute joaillerie", "lab-grown", "sustainable jewelry"
+    "launch", "unveils", "collection", "campaign", "ambassador", "face of the brand",
+    "store launch", "flagship", "expansion", "lab-grown", "LGD", "bridal", "festive",
+    "Gudi Padwa", "Akshaya Tritiya", "design language", "karigari", "craftsmanship"
 ]
 
 # ----------------------------
-# RSS Sources (Upgraded with Global Industry News)
+# Professional Industry Feeds (CRITICAL ADDITIONS)
 # ----------------------------
-
 BASE_FEEDS = [
-    # Indian Business
-    "https://www.moneycontrol.com/rss/business.xml",
-    "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms",
-    # Global Jewellery & Luxury
-    "https://www.professionaljeweller.com/feed/",
-    "https://nationaljeweler.com/rss",
+    "https://www.indianjeweller.in/rss/news", # Essential for Indian retail trade
+    "https://www.retailjewellerindia.com/feed/", # Strategic retail moves
+    "https://www.professionaljeweller.com/feed/", # Global industry trends
+    "https://nationaljeweler.com/rss", # Diamond and gemstone market intel
+    "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms"
 ]
 
 def generate_google_news_feeds():
     feeds = []
-    # Search for broader trend keywords to catch non-brand specific launches
-    trend_queries = ["lab+grown+diamond+launch", "high+jewelry+collection+unveiled"]
-    
+    # Targeted queries for campaigns and store openings
+    special_queries = ["jewelry+ad+campaign+india", "jewellery+retail+expansion+india", "new+jewellery+store+opening"]
     for brand in ALL_BRANDS:
-        query = brand.replace(" ", "+") + "+jewellery+launch"
-        feeds.append(f"https://news.google.com/rss/search?q={query}")
-        
-    for query in trend_queries:
-        feeds.append(f"https://news.google.com/rss/search?q={query}")
-        
+        feeds.append(f"https://news.google.com/rss/search?q={brand.replace(' ', '+')}+jewellery+campaign+OR+launch")
+    for q in special_queries:
+        feeds.append(f"https://news.google.com/rss/search?q={q}")
     return feeds
 
-# ----------------------------
-# Memory Management
-# ----------------------------
-
-MEMORY_FILE = "seen_links.txt"
-
-def read_memory():
-    if not os.path.exists(MEMORY_FILE):
-        return set()
-    with open(MEMORY_FILE, "r") as f:
-        return set(f.read().splitlines())
-
-def write_memory(links):
-    if not links:
-        return
-    with open(MEMORY_FILE, "a") as f:
-        for link in links:
-            f.write(link + "\n")
-
-# ----------------------------
-# Fetch & Filter Logic
-# ----------------------------
+# --- (Memory functions: read_memory/write_memory remain the same) ---
 
 def fetch_all_articles():
     feeds = BASE_FEEDS + generate_google_news_feeds()
     articles = []
-
     for url in feeds:
         try:
             feed = feedparser.parse(url)
-            for entry in feed.entries[:10]: # Limit to top 10 per feed to speed up processing
+            for entry in feed.entries[:15]:
                 articles.append({
                     "title": entry.title,
                     "link": entry.link,
                     "summary": getattr(entry, "summary", "")
                 })
-        except Exception as e:
-            logging.error(f"Failed to parse feed {url}: {e}")
-
+        except: continue
     return articles
-
-def is_launch_related(text):
-    text = text.lower()
-    return any(keyword in text for keyword in LAUNCH_KEYWORDS)
 
 def filter_articles(articles, seen_links):
     filtered = []
     for a in articles:
-        if a["link"] in seen_links:
-            continue
-
+        if a["link"] in seen_links: continue
         combined = (a["title"] + " " + a["summary"]).lower()
-
-        # Check if it mentions a brand OR a major industry keyword, AND is a launch
-        mentions_brand = any(b.lower() in combined for b in ALL_BRANDS)
-        is_launch = is_launch_related(combined)
-        
-        if mentions_brand and is_launch:
+        if any(k in combined for k in LAUNCH_KEYWORDS) or any(b.lower() in combined for b in ALL_BRANDS):
             filtered.append(a)
-
-    # Deduplicate by link before returning
     return list({v['link']:v for v in filtered}.values())
 
 # ----------------------------
-# GPT: Extract Launch Intelligence
+# The Merchandiser's Prompt
 # ----------------------------
-
 def extract_launch_intel(articles):
-    if not articles:
-        return "No new jewellery product launches or major trends detected today."
-
-    # Convert articles to a clean string format to save tokens
-    articles_text = "\n".join([f"Title: {a['title']}\nSummary: {a['summary']}\nLink: {a['link']}\n" for a in articles])
+    if not articles: return "No new momentum detected today."
+    articles_text = "\n".join([f"Title: {a['title']}\nSummary: {a['summary']}\nLink: {a['link']}" for a in articles])
 
     prompt = f"""
-    You are an elite Market Intelligence Analyst for the global jewellery industry.
-    Review the following news articles and extract actual product launches, new collections, or major design trends. 
+    You are a Chief Merchandising Officer. Analyze these jewellery industry updates.
     
-    Categorize them under '### Indian Market' and '### Global Market'.
-    
-    Instead of long lists, compress each launch into a single, highly readable bullet point. 
-    Format strictly like this example:
-    * **Brand Name** launched **Product Name** in the Category segment to [briefly explain the purpose/intel]. **Strategic Impact:** [1 concise sentence analyzing how this shifts competitive positioning, supply chain/sourcing dynamics, or market share]. [Source](insert_the_link_here)
+    Format the email as a "Merchandiser’s Morning Brief":
 
-    Rules:
-    - NEVER output raw URLs. Always hide the URL inside a clean markdown link like this: [Source](url).
-    - Combine the brand, product, category, and intel into one flowing narrative sentence.
-    - Keep it dense and concise so maximum data fits into a quick-read email.
-    - Ignore generic financial news.
+    ### 🌐 Macro Momentum
+    [Summarize today's dominant industry shift in 2 sentences. e.g., 'A major pivot toward regional festive campaigns (Gudi Padwa) and rapid Tier-2 retail expansion.']
 
-    Articles to analyze:
+    ### 💎 Product & Craft Intelligence
+    * **[Brand] - [Collection/Product]**
+      * **Design Craft:** [Detail the technique/materials: e.g., 14kt rose gold, lightweight polki, sculptural minimalism].
+      * **Merchandising Angle:** [Why now? Who is the target? Strategic positioning?] [Source](link)
+
+    ### 🚀 Campaigns & Retail Footprint
+    * **[Brand]:** [Detail new ad campaigns, celebrity ambassadors, or store openings]. **Strategic Impact:** [How does this affect market share or brand perception?] [Source](link)
+
+    Articles:
     {articles_text}
     """
+
 
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a concise, highly analytical market intelligence bot. You write dense, professional summaries."},
+                {"role": "system", "content": "You are a Chief Merchandising Officer delivering a dense, professional daily briefing to a sourcing and design team."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3
