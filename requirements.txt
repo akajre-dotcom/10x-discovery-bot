@@ -1,2 +1,2 @@
-openai
-feedparser
+openai>=1.14.0
+feedparser>=6.0.11
