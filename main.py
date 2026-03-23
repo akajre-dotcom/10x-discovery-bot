@@ -3,6 +3,7 @@ import feedparser
 import logging
 from openai import OpenAI
 from emailer import send_email
+import markdown # <-- NEW IMPORT
 
 # Set up logging for GitHub Actions
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -161,7 +162,8 @@ def main():
     launch_articles = filter_articles(articles, seen_links)
     logging.info(f"Found {len(launch_articles)} new potential launch articles.")
 
-    report = extract_launch_intel(launch_articles)
+    # Get the raw markdown report from GPT
+    report_md = extract_launch_intel(launch_articles)
     
     if launch_articles:
         new_links = [a["link"] for a in launch_articles]
@@ -169,11 +171,18 @@ def main():
 
     subject = "💎 Merchandiser’s Morning Brief: Global & Indian Jewellery Trends"
     
+    # Convert the Markdown text to HTML so links are embedded neatly
+    report_html = markdown.markdown(report_md)
+    
     try:
-        send_email(report, subject)
+        # Pass the HTML formatted report to your emailer
+        send_email(report_html, subject)
         logging.info("Email sent successfully.")
     except Exception as e:
         logging.error(f"Failed to send email: {e}")
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
